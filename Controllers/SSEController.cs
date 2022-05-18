@@ -15,11 +15,10 @@ namespace SSEDemoApp.Controllers
         }
 
         [HttpGet]
-        //        [HttpGet("/sse")]
         public async Task Get()
         {
             await HttpContext.SSEInitAsync();
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 10; i++)
             {
                 await HttpContext.SSESendDataAsync();
             }

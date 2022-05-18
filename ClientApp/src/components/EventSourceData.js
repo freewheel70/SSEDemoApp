@@ -5,28 +5,37 @@ function EventSourceData() {
     const [status, setStatus] = useState("Unknown")
     const [list, setList] = useState([]);
 
+    let onConnectSSEAPI = () => {
+        setList([]);
+        const evtSource = new EventSource("sse");
+
+        evtSource.addEventListener("city-notification", event => {
+            //debugger;
+            setList(d => [...d, event.data]);
+        });
+
+        evtSource.addEventListener("open", event => {
+            console.log("open: " + performance.now())
+            setStatus("Open")
+        })
+        evtSource.addEventListener("error", (event) => {
+            console.log("Error happened");
+            console.log("error: " + performance.now())
+            evtSource.close();
+            setTimeout(() => onConnectSSEAPI(), Math.random() * 10000 + 5000)
+        });
+
+        evtSource.addEventListener("close", (event) => {
+            evtSource.close();
+            setStatus("Close")
+            console.log("close: " + performance.now())
+        });
+
+    };
     return (
         <div style={{display: "flex", flexDirection: "row"}}>
             <div style={{flex: 1}}>
-                <button className="btn btn-primary" onClick={() => {
-                    setList([]);
-                    const evtSource = new EventSource("sse");
-                    evtSource.addEventListener("open", event=>{
-                        setStatus("Open")
-                    })
-                    console.log("new event source connected")
-                    evtSource.addEventListener("data", event => {
-                        console.log("list length: " + list.length)
-                        console.log("event.data " + event.data);
-                        //debugger;
-                        setList(d => [...d, event.data]);
-                    });
-                    evtSource.addEventListener("close", (event) => {
-                        console.log("Close connection");
-                        evtSource.close();
-                        setStatus("Close")
-                    });
-                }}>
+                <button className="btn btn-primary" onClick={onConnectSSEAPI}>
                     Start Receive Server Events
                 </button>
                 <br/>
